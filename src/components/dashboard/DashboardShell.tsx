@@ -9,7 +9,7 @@ import GlassSurface from "@/components/ui/react-bits/GlassSurface";
 import Ballpit from "@/components/ui/react-bits/Ballpit";
 import type { SessionUser } from "@/lib/auth";
 
-const NAV_ITEMS = [{ href: "/", label: "Dashboard" }];
+const NAV_ITEMS = [{ href: "/", label: "Dashboard", icon: "solar:widget-5-bold" }];
 
 export function DashboardShell({
   user,
@@ -43,12 +43,13 @@ export function DashboardShell({
               <Link
                 key={item.href}
                 href={item.href}
-                className={`block px-4 py-3 rounded-md text-sm font-semibold transition-colors ${
+                className={`flex items-center gap-2 px-4 py-3 rounded-md text-sm font-semibold transition-colors ${
                   active
                     ? "bg-[var(--rose-400)] text-white"
                     : "text-[var(--ink-soft)] hover:bg-[var(--rose-50)]"
                 }`}
               >
+                <Icon icon={item.icon} className="text-lg" />
                 {item.label}
               </Link>
             );

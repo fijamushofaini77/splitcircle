@@ -5,6 +5,8 @@ import { db } from '@/lib/db';
 import { users } from '@/lib/schema';
 import { signToken, AUTH_COOKIE_NAME } from '@/lib/auth';
 import { registerSchema } from '@/lib/validators';
+import { checkRateLimit } from '@/lib/rateLimit';
+import { getClientIp } from '@/lib/getClientIp';
 
 const AVATAR_COLORS = ['#7a2e3a', '#c98a2c', '#3a6b5c', '#5a4a8a', '#2c6b8f', '#a8452f'];
 
@@ -14,6 +16,16 @@ export async function POST(req: NextRequest) {
   if (!parsed.success) {
     return NextResponse.json({ error: parsed.error.issues[0].message }, { status: 400 });
   }
+
+  const ip = getClientIp(req);
+  const ipLimit = await checkRateLimit(`register:ip:${ip}`, 5, 60 * 60 * 1000);
+  if (!ipLimit.allowed) {
+    return NextResponse.json(
+      { error: 'Terlalu banyak percobaan pendaftaran dari perangkat ini. Coba lagi nanti.' },
+      { status: 429 }
+    );
+  }
+
   const { name, email, password } = parsed.data;
   const normalizedEmail = email.toLowerCase();
 

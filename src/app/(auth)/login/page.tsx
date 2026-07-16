@@ -40,7 +40,7 @@ export default function LoginPage() {
   return (
     <Card className="w-full border-none shadow-none rounded-none">
       <CardHeader className="flex flex-col items-center text-center gap-1">
-        <Logo className="mb-2" size="large" />
+        <Logo size="large" />
         <h1 className="text-xl font-semibold text-[var(--maroon-dark)]">Masuk ke akunmu</h1>
       </CardHeader>
       <CardContent>
@@ -77,7 +77,7 @@ export default function LoginPage() {
             {loading ? "Memproses..." : "Masuk"}
           </Button>
         </form>
-        <p className="text-center text-sm text-muted-foreground mt-6">
+        <p className="text-center text-sm text-muted-foreground mt-10">
           Belum punya akun?{" "}
           <Link href="/register" className="text-[var(--rose-400)] font-medium hover:underline">
             Daftar sekarang

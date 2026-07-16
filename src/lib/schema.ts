@@ -3,6 +3,8 @@ import {
   text,
   uuid,
   numeric,
+  integer,
+  bigint,
   timestamp,
   uniqueIndex,
 } from 'drizzle-orm/pg-core';
@@ -63,6 +65,12 @@ export const settlements = pgTable('settlements', {
   status: text('status').default('pending'),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
   confirmedAt: timestamp('confirmed_at', { withTimezone: true }),
+});
+
+export const rateLimits = pgTable('rate_limits', {
+  key: text('key').primaryKey(),
+  windowStart: bigint('window_start', { mode: 'number' }).notNull(),
+  count: integer('count').notNull().default(1),
 });
 
 export const activityLog = pgTable('activity_log', {

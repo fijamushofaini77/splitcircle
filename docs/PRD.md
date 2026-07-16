@@ -114,10 +114,10 @@ Batasan aksi yang ada murni berbasis kepemilikan data, bukan role:
 | --- | --- | --- |
 | Enkripsi password | Password di-hash dengan bcrypt (bukan disimpan plain text) | ✅ Terpenuhi |
 | Sesi | JWT httpOnly cookie, `sameSite=lax`, `secure` di production, expiry 7 hari | ✅ Terpenuhi |
-| Otorisasi | Setiap endpoint grup memverifikasi keanggotaan sebelum baca/tulis data; aksi hapus/confirm dibatasi ke pemilik data | ✅ Terpenuhi |
-| Validasi input | Skema Zod untuk payload | ⚠️ Baru menutup register/login; expenses/groups/settlements masih validasi manual di route handler |
+| Otorisasi | Setiap endpoint grup memverifikasi keanggotaan sebelum baca/tulis data; aksi hapus/confirm dibatasi ke pemilik data | ⚠️ Sebagian besar terpenuhi — satu gap diketahui: `POST /api/groups/[groupId]/settlements` belum memvalidasi `to_user` sebagai anggota grup yang sama |
+| Validasi input | Skema Zod untuk payload | ✅ Terpenuhi — register, login, expenses, groups, settlements semua tervalidasi Zod |
 | Proteksi route | Middleware terpusat, bukan per-halaman | ✅ Terpenuhi |
-| Rate limiting | Pembatasan percobaan login/register untuk cegah brute-force | ❌ Belum ada |
+| Rate limiting | Pembatasan percobaan login/register untuk cegah brute-force | ✅ Terpenuhi — per IP & per email untuk login, per IP untuk register (fixed-window di tabel `rate_limits`) |
 | Data integrity | Foreign key + `ON DELETE CASCADE` di skema; total split custom/persentase divalidasi | ✅ Terpenuhi |
 
 **Ketentuan performa & keandalan:**
@@ -125,8 +125,8 @@ Batasan aksi yang ada murni berbasis kepemilikan data, bukan role:
 | Aspek | Ketentuan | Status |
 | --- | --- | --- |
 | Perhitungan balances | Dihitung ulang on-demand tiap request (bukan state tersimpan), sehingga selalu konsisten dengan data terbaru | ⚠️ Cukup untuk grup kecil; berpotensi lambat kalau expense per grup sudah ribuan baris karena banyak query kecil per expense |
-| Migrasi database | Skema didefinisikan di kode (Drizzle) dan bisa di-generate ulang | ⚠️ Sinkronisasi masih pakai `drizzle-kit push` langsung, belum migrasi terversi |
-| Automated testing | Unit test debt engine, integration test route API | ❌ Belum ada |
+| Migrasi database | Skema didefinisikan di kode (Drizzle) dan bisa di-generate ulang | ✅ Terpenuhi — migrasi terversi via `npm run db:generate` + `db:migrate`, `drizzle-kit push` tidak dipakai lagi |
+| Automated testing | Unit test debt engine, integration test route API | ⚠️ Sebagian — 8 unit test untuk `debtEngine.ts` (`simplifyDebts`) sudah ada dan lolos; integration test route API belum ada |
 
 ## 5. Database Schema
 
@@ -260,6 +260,10 @@ And status settlement tetap pending
   yang menunggu konfirmasi.
 - Tidak ada alur leave/kick anggota grup di UI saat ini.
 - Export hanya CSV, belum PDF.
+- `to_user` pada `POST /api/groups/[groupId]/settlements` belum
+  divalidasi sebagai anggota grup yang sama (lihat tabel keamanan di
+  §4) — ini tercatat sebagai gap teknis yang belum diperbaiki, bukan
+  keputusan out-of-scope yang disengaja.
 
 ### C. Open Questions
 
@@ -272,9 +276,11 @@ And status settlement tetap pending
 
 ### D. Roadmap
 
-- [ ] Automated test untuk debt engine & route API kritikal
-- [ ] Validasi Zod menyeluruh di semua route
-- [ ] Migrasi database terversi (bukan `drizzle-kit push` langsung)
+- [x] Automated test untuk debt engine (route API kritikal masih belum)
+- [x] Validasi Zod menyeluruh di semua route
+- [x] Migrasi database terversi (bukan `drizzle-kit push` langsung)
+- [x] Rate limiting login/register
+- [ ] Perbaiki gap otorisasi `to_user` di settlement (lihat §4)
 - [ ] Notifikasi pengingat utang (email/WhatsApp)
 - [ ] Export PDF
 - [ ] Dukungan multi-currency

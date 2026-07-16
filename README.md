@@ -103,7 +103,8 @@ grup punya riwayat yang bisa diaudit.
 - `src/components/ui` — komponen dasar shadcn/ui + `GlassSurface`
 - `src/lib/schema.ts` — skema database (Drizzle ORM), lengkap dengan relations
 - `src/lib/debtEngine.ts` — logika kalkulasi & penyederhanaan utang
-- `src/lib/validators.ts` — skema validasi Zod untuk register/login
+- `src/lib/validators.ts` — skema validasi Zod (auth, expenses, groups, settlements)
+- `src/lib/rateLimit.ts`, `src/lib/getClientIp.ts` — rate limiting login/register
 - `src/lib/auth.ts` — sign/verify JWT; `src/lib/session.ts` — baca sesi dari cookie
 - `src/middleware.ts` — proteksi route (semua path privat kecuali `/login` & `/register`)
 - `drizzle/` — migrasi database yang sudah di-generate
@@ -116,7 +117,7 @@ git clone https://github.com/fijamushofaini77/splitcircle.git
 cd splitcircle
 npm install
 cp .env.example .env.local   # isi DATABASE_URL & JWT_SECRET
-npx drizzle-kit push         # sinkronkan skema ke database Neon
+npm run db:migrate           # jalankan migrasi terversi ke database Neon
 npm run dev
 ```
 
@@ -127,7 +128,7 @@ Buka [http://localhost:3000](http://localhost:3000).
 > Next.js sendiri otomatis membaca `.env.local` juga. Jadi pastikan kamu
 > menyalin `.env.example` ke **`.env.local`**, bukan `.env` — kalau salah
 > nama file, `next dev` masih jalan (karena masih ada fallback env lain),
-> tapi `drizzle-kit push` akan gagal menemukan `DATABASE_URL`.
+> tapi `drizzle-kit generate`/`migrate` akan gagal menemukan `DATABASE_URL`.
 
 Variabel yang dibutuhkan (lihat `.env.example`):
 
@@ -164,11 +165,18 @@ Variabel yang dibutuhkan (lihat `.env.example`):
   mendefinisikan seluruh tabel (users, groups, group_members, expenses,
   expense_shares, settlements, activity_log) plus relations Drizzle,
   sehingga migrasi di `drizzle/` selalu bisa di-generate ulang dan direplay.
-- **Validasi terpusat di Zod, tapi belum menyeluruh.** `registerSchema`
-  dan `loginSchema` sudah dipakai di route auth. Endpoint lain (expenses,
-  settlements, groups) saat ini masih melakukan pengecekan manual di
-  dalam route handler, bukan lewat skema Zod — konsisten dengan pola auth
-  akan jadi peningkatan yang wajar berikutnya.
+- **Validasi terpusat di Zod, sudah menyeluruh.** Semua route POST kini
+  divalidasi lewat skema di `src/lib/validators.ts`: `registerSchema`,
+  `loginSchema`, `createExpenseSchema`, `createGroupSchema`,
+  `joinGroupSchema`, `createSettlementSchema`. Satu gap otorisasi yang
+  diketahui (bukan soal validasi format): `POST /api/groups/[groupId]/
+  settlements` belum memverifikasi bahwa `to_user` adalah anggota grup
+  yang sama.
+- **Rate limiting berbasis tabel Postgres, bukan in-memory.** Login
+  (per IP & per email) dan register (per IP) dibatasi lewat tabel
+  `rate_limits` (fixed-window, upsert atomic) di `src/lib/rateLimit.ts`
+  — dipilih karena driver `neon-http` tidak mendukung transaksi, dan
+  in-memory counter tidak reliable di lingkungan serverless.
 - **Identitas visual: palet rose/maroon/gold + Poppins.** Warna dasar
   didefinisikan sebagai CSS variable (`--rose-400`, `--maroon-dark`,
   `--gold`, dst.) di atas token shadcn/ui standar (style `base-nova`,
@@ -186,25 +194,28 @@ Variabel yang dibutuhkan (lihat `.env.example`):
 Bagian ini ditulis jujur berdasarkan isi kode saat ini, supaya tidak
 overclaim soal kesiapan produksi:
 
-- Belum ada automated test (unit/integration) untuk `debtEngine.ts`
-  maupun route API — penting terutama untuk debt engine karena kesalahan
-  di sini langsung berarti saldo uang yang salah.
-- Validasi Zod baru menutup register/login; endpoint expenses/groups/
-  settlements masih validasi manual (lihat catatan di *Design notes*).
-- `npx drizzle-kit push` dipakai untuk sinkronisasi skema, belum ada
-  proses migrasi terversi (`drizzle-kit generate` + `migrate`) yang
-  dijalankan otomatis — cocok untuk development, kurang cocok untuk
-  pipeline deploy yang butuh riwayat migrasi yang bisa diaudit.
+- Automated test baru mencakup `debtEngine.ts` (`simplifyDebts`, 8 test
+  case) — route API (auth, expenses, groups, settlements) belum punya
+  test otomatis sama sekali.
+- Ada satu gap otorisasi yang diketahui: `POST /api/groups/[groupId]/
+  settlements` tidak memverifikasi `to_user` adalah anggota grup yang
+  sama, jadi secara teknis settlement bisa diajukan ke user di luar
+  grup. Ini murni celah otorisasi, bukan soal validasi format input.
 - Navigasi sidebar (`DashboardShell`) saat ini hanya berisi satu item
   ("Dashboard"); halaman grup diakses lewat kartu grup atau tautan
   langsung, bukan dari menu.
-- Belum ada rate limiting di endpoint auth (register/login).
+- Endpoint balances (`GET /api/groups/[groupId]/balances`) melakukan
+  query berulang per expense untuk mengambil share-nya — cukup untuk
+  skala grup pertemanan, tapi layak dioptimalkan kalau expense per grup
+  sudah besar (lihat *Design notes*).
 
 ## Roadmap
 
-- [ ] Automated test untuk debt engine & route API kritikal
-- [ ] Validasi Zod menyeluruh di semua route (expenses, groups, settlements)
-- [ ] Migrasi database terversi untuk pipeline deploy (bukan `drizzle-kit push` langsung)
+- [x] Automated test untuk debt engine (route API kritikal masih belum)
+- [x] Validasi Zod menyeluruh di semua route (expenses, groups, settlements)
+- [x] Migrasi database terversi untuk pipeline deploy (bukan `drizzle-kit push` langsung)
+- [x] Rate limiting untuk login/register
+- [ ] Perbaiki gap otorisasi: `to_user` di settlement belum divalidasi sebagai anggota grup
 - [ ] Notifikasi pengingat utang via email/WhatsApp
 - [ ] Export laporan pengeluaran grup (PDF, selain CSV yang sudah ada)
 - [ ] Dukungan multi-currency

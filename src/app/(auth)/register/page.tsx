@@ -45,7 +45,7 @@ export default function RegisterPage() {
   return (
     <Card className="w-full border-none shadow-none rounded-none">
       <CardHeader className="flex flex-col items-center text-center gap-1">
-        <Logo className="mb-2" size="large" />
+        <Logo size="large" />
         <h1 className="text-xl font-semibold text-[var(--maroon-dark)]">Buat akun baru</h1>
       </CardHeader>
       <CardContent>
@@ -92,7 +92,7 @@ export default function RegisterPage() {
             {loading ? "Memproses..." : "Daftar"}
           </Button>
         </form>
-        <p className="text-center text-sm text-muted-foreground mt-6">
+        <p className="text-center text-sm text-muted-foreground mt-10">
           Sudah punya akun?{" "}
           <Link href="/login" className="text-[var(--rose-400)] font-medium hover:underline">
             Masuk di sini

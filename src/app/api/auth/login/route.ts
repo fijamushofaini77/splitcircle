@@ -5,6 +5,8 @@ import { db } from '@/lib/db';
 import { users } from '@/lib/schema';
 import { signToken, AUTH_COOKIE_NAME } from '@/lib/auth';
 import { loginSchema } from '@/lib/validators';
+import { checkRateLimit } from '@/lib/rateLimit';
+import { getClientIp } from '@/lib/getClientIp';
 
 export async function POST(req: NextRequest) {
   const body = await req.json().catch(() => null);
@@ -13,8 +15,25 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: parsed.error.issues[0].message }, { status: 400 });
   }
   const { email, password } = parsed.data;
+  const normalizedEmail = email.toLowerCase();
 
-  const row = await db.query.users.findFirst({ where: eq(users.email, email.toLowerCase()) });
+  const ip = getClientIp(req);
+  const ipLimit = await checkRateLimit(`login:ip:${ip}`, 20, 15 * 60 * 1000);
+  if (!ipLimit.allowed) {
+    return NextResponse.json(
+      { error: 'Terlalu banyak percobaan login dari perangkat ini. Coba lagi beberapa menit lagi.' },
+      { status: 429 }
+    );
+  }
+  const emailLimit = await checkRateLimit(`login:email:${normalizedEmail}`, 5, 15 * 60 * 1000);
+  if (!emailLimit.allowed) {
+    return NextResponse.json(
+      { error: 'Terlalu banyak percobaan login untuk akun ini. Coba lagi beberapa menit lagi.' },
+      { status: 429 }
+    );
+  }
+
+  const row = await db.query.users.findFirst({ where: eq(users.email, normalizedEmail) });
   if (!row || !bcrypt.compareSync(password, row.passwordHash)) {
     return NextResponse.json({ error: 'Email atau password salah.' }, { status: 401 });
   }
