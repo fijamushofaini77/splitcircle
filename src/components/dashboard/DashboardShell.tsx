@@ -28,13 +28,12 @@ export function DashboardShell({
   }
 
   const initial = user.name?.charAt(0)?.toUpperCase() || "?";
-  const isGroupDetail = pathname?.startsWith("/groups/");
 
   return (
     <div className="min-h-screen flex bg-[#fdf5f7]">
       {/* Sidebar — independen, scroll sendiri, tidak ikut topbar */}
       <aside className="w-64 bg-white border-r border-[var(--rose-100)] p-6 h-screen sticky top-0 flex flex-col">
-        <div className="mb-10">
+        <div className="mb-10 flex justify-center">
           <Logo size="large" />
         </div>
         <nav className="space-y-1 flex-1">
@@ -44,7 +43,7 @@ export function DashboardShell({
               <Link
                 key={item.href}
                 href={item.href}
-                className={`block px-4 py-3 rounded-xl text-sm font-semibold transition-colors ${
+                className={`block px-4 py-3 rounded-md text-sm font-semibold transition-colors ${
                   active
                     ? "bg-[var(--rose-400)] text-white"
                     : "text-[var(--ink-soft)] hover:bg-[var(--rose-50)]"
@@ -54,11 +53,6 @@ export function DashboardShell({
               </Link>
             );
           })}
-          {isGroupDetail && (
-            <div className="block px-4 py-3 rounded-xl text-sm font-semibold bg-[var(--rose-400)] text-white">
-              Detail Grup
-            </div>
-          )}
         </nav>
       </aside>
 
