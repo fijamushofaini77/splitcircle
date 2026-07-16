@@ -1,5 +1,4 @@
 "use client";
-
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -9,14 +8,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Logo } from "@/components/brand/Logo";
-
 export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
@@ -40,15 +37,11 @@ export default function LoginPage() {
       setLoading(false);
     }
   }
-
   return (
-    <Card className="w-full max-w-[380px] border-none shadow-lg">
-      <CardHeader>
-        <Logo className="mb-2" />
+    <Card className="w-full border-none shadow-none rounded-none">
+      <CardHeader className="flex flex-col items-center text-center gap-1">
+        <Logo className="mb-2" size="large" />
         <h1 className="text-xl font-semibold text-[var(--maroon-dark)]">Masuk ke akunmu</h1>
-        <p className="text-sm text-muted-foreground">
-          Kelola patungan dan utang circle pertemananmu.
-        </p>
       </CardHeader>
       <CardContent>
         {error && (

@@ -6,6 +6,7 @@ import { Icon } from "@iconify/react";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/brand/Logo";
 import GlassSurface from "@/components/ui/react-bits/GlassSurface";
+import Ballpit from "@/components/ui/react-bits/Ballpit";
 import type { SessionUser } from "@/lib/auth";
 
 const NAV_ITEMS = [{ href: "/", label: "Dashboard" }];
@@ -62,7 +63,22 @@ export function DashboardShell({
       </aside>
 
       {/* Konten kanan: topbar sticky + main */}
-      <div className="flex-1 flex flex-col min-h-screen">
+      <div className="relative flex-1 flex flex-col min-h-screen overflow-hidden">
+        <div className="absolute inset-0 -z-0">
+          <Ballpit
+            className="pointer-events-none"
+            count={40}
+            gravity={0}
+            friction={0.985}
+            wallBounce={0.95}
+            followCursor={false}
+            colors={[0xffe9ef, 0xffc9d7, 0xffbccd, 0xff9cb5, 0xfc809f]}
+            flightChance={0.0008}
+            flightForce={0.4}
+            flightBoostVelocity={0.5}
+            flightDuration={30}
+          />
+        </div>
         <div className="sticky top-0 z-40 px-6 pt-4">
           <GlassSurface
             width="100%"
@@ -89,7 +105,7 @@ export function DashboardShell({
           </GlassSurface>
         </div>
 
-        <main className="flex-1 overflow-y-auto p-6 lg:p-8">{children}</main>
+        <main className="relative z-10 flex-1 overflow-y-auto p-6 lg:p-8">{children}</main>
       </div>
     </div>
   );

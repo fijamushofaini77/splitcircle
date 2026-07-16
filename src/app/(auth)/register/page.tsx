@@ -43,13 +43,10 @@ export default function RegisterPage() {
   }
 
   return (
-    <Card className="w-full max-w-[380px] border-none shadow-lg">
-      <CardHeader>
-        <Logo className="mb-2" />
+    <Card className="w-full border-none shadow-none rounded-none">
+      <CardHeader className="flex flex-col items-center text-center gap-1">
+        <Logo className="mb-2" size="large" />
         <h1 className="text-xl font-semibold text-[var(--maroon-dark)]">Buat akun baru</h1>
-        <p className="text-sm text-muted-foreground">
-          Mulai kelola patungan dengan circle-mu.
-        </p>
       </CardHeader>
       <CardContent>
         {error && (
