@@ -1,0 +1,6 @@
+drizzle/** linguist-generated
+public/** linguist-generated
+*.config.* linguist-generated
+components.json linguist-generated
+package-lock.json linguist-generated
+tsconfig.json linguist-generated
