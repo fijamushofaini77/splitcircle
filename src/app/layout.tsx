@@ -9,8 +9,7 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: "SplitCircle — Split Bill & Utang Circle",
-  description: "Kelola patungan dan utang circle pertemanan dengan mudah.",
+  title: "SplitCircle"
 };
 
 export default function RootLayout({

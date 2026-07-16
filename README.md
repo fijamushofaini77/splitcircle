@@ -1,5 +1,4 @@
 <div align="center">
-  <img src="public/logo.svg" width="88" alt="SplitCircle">
   <h1>SplitCircle</h1>
   <p>Patungan dan utang circle pertemanan, beres dalam satu tempat.</p>
 
@@ -21,7 +20,7 @@ bukan lagi hitung-hitungan manual di chat grup.
 
 ## How it works
 
-\`\`\`mermaid
+```mermaid
 flowchart LR
   U["Anggota circle<br/>(pembayar)"] -->|"catat expense"| E["Expense record"]
   E -->|"dibagi ke peserta"| DE["Debt Engine"]
@@ -30,7 +29,7 @@ flowchart LR
   S -->|"update saldo"| B
   B --> A["Activity log"]
   S --> A
-\`\`\`
+```
 
 Setiap expense dicatat dengan pembayar dan daftar peserta yang menanggung.
 Debt Engine menjumlahkan seluruh expense di dalam sebuah circle lalu
@@ -57,14 +56,14 @@ log sehingga seluruh anggota circle punya riwayat yang bisa diaudit.
 
 ## Running locally
 
-\`\`\`bash
+```bash
 git clone https://github.com/fijamushofaini77/splitcircle.git
 cd splitcircle
 npm install
 cp .env.example .env   # isi kredensial database & auth secret
 npx drizzle-kit push   # sinkronkan skema ke database
 npm run dev
-\`\`\`
+```
 
 Buka [http://localhost:3000](http://localhost:3000).
 
@@ -87,11 +86,6 @@ Buka [http://localhost:3000](http://localhost:3000).
   agar migrasi terlacak dan bisa direplay, bukan diubah manual di database.
 - Validasi input dipisahkan ke `src/lib/validators.ts` supaya aturan yang
   sama bisa dipakai baik di form client maupun di API route.
-
-> Catatan: bagian *Design notes* di atas ditulis berdasarkan struktur folder
-> project, bukan hasil membaca langsung isi kode. Kalau ada detail
-> implementasi debt-engine atau alur auth yang mau ditulis lebih presisi,
-> share isi filenya dan aku update bagian ini biar akurat.
 
 ## Roadmap
 
