@@ -5,6 +5,7 @@
   <img src="https://img.shields.io/badge/framework-Next.js%2016-black.svg" alt="Next.js 16">
   <img src="https://img.shields.io/badge/language-TypeScript-3178C6.svg" alt="TypeScript">
   <img src="https://img.shields.io/badge/database-Neon%20Postgres-00E599.svg" alt="Neon Postgres">
+  <a href="https://splitcircle-pijey.vercel.app/"><img src="https://img.shields.io/badge/demo-live-ff5f87.svg" alt="Live Demo"></a>
 </div>
 
 ---
